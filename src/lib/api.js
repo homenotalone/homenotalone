@@ -168,7 +168,7 @@ export async function getArticleById(id) {
 export async function getRepliesByArticleSlug(slug) {
   return await db.tx('get-replies-by-article-slug', async t => {
     const replies = await t.any(
-      'SELECT replies.* FROM articles LEFT JOIN replies ON articles.article_id = replies.article_id WHERE slug = $1',
+      'SELECT replies.* FROM articles JOIN replies ON articles.article_id = replies.article_id WHERE slug = $1',
       [slug]
     );
     return replies;

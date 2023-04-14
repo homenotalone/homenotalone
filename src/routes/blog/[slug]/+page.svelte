@@ -77,10 +77,11 @@
   }
 
   async function postReply(event) {
+    if (!currentUser) return alert('Sorry, you are not authorized.'); // TODO: redirect to own users website, send articleId as query param
     try {
       await fetchJSON('POST', '/api/replies', {
         articleId: data.articleId,
-        author: 'me', //todo: get author url here,
+        author: 'ME', //todo: get author url here?
         content: event.detail
       });
       await invalidateAll();
@@ -124,8 +125,28 @@
 />
 
 <!-- Reply placeholder -->
-<div class="max-w-screen-md mx-auto px-6 pb-12 sm:pb-24 pl-20">
+<div class="max-w-screen-md mx-auto px-6 pb-12 sm:pb-24 sm:pl-16">
   <div id="article_replies" class="prose-sm sm:prose-xl">
+    {#if replies.length}
+      <div class="flex items-baseline gap-x-2 text-gray-500">
+        {replies.length}
+        {replies.length === 1 ? 'reply' : 'replies'}
+        <svg
+          width="10"
+          height="10"
+          viewBox="0 0 10 10"
+          fill="none"
+          xmlns="http://www.w3.org/2000/svg"
+        >
+          <path
+            d="M9 9.5C9.27614 9.5 9.5 9.27614 9.5 9L9.5 4.5C9.5 4.22386 9.27614 4 9 4C8.72386 4 8.5 4.22386 8.5 4.5L8.5 8.5L4.5 8.5C4.22386 8.5 4 8.72386 4 9C4 9.27614 4.22386 9.5 4.5 9.5L9 9.5ZM0.646447 1.35355L8.64645 9.35355L9.35355 8.64645L1.35355 0.646447L0.646447 1.35355Z"
+            fill="black"
+          />
+        </svg>
+      </div>
+    {:else}
+      <div class="">No replies yet</div>
+    {/if}
     {#each replies as reply}
       {#if reply.content}
         <Reply content={reply.content} published={reply.createdAt} author={reply.authorDomain} />
