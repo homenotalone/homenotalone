@@ -1,9 +1,10 @@
 {
-  "name": "editable-website",
+  "name": "editable-home",
   "version": "0.0.1",
   "private": true,
   "scripts": {
     "dev": "vite dev",
+    "debug": "vavite-loader vite dev --debug",
     "build": "vite build",
     "preview": "vite preview",
     "lint": "prettier --plugin-search-dir . --check . && eslint .",
@@ -14,6 +15,7 @@
     "@sveltejs/kit": "^1.5.3",
     "@tailwindcss/forms": "^0.5.3",
     "@tailwindcss/typography": "^0.5.9",
+    "@vavite/node-loader": "^1.7.0",
     "autoprefixer": "^10.4.14",
     "eslint": "^8.28.0",
     "eslint-config-prettier": "^8.5.0",

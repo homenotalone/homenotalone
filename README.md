@@ -1,8 +1,23 @@
-# editable-website
+# Home not alone
+Get yourself a home on the internet and have friends over!
 
+What if we can form a neighborhood of websites that are all connected by conversations. A social network web of public websites, just like how it was. 
+Instead of a simple "follow" button, the contact is established when you first reply to a post on another website, and both the original post and its replies are then reflected on both websites.
+
+## How it works:
+Let's call a person that has a `home`-site and following the API contracts a `member`. 
+1. When a member (e.g., iamfrank) wants to reply to a blog entry on another website (e.g., iamsusan.com), they are redirected back to their own website (e.g., iamfrank.com) with the blog entry URL as a query parameter.
+2. The member logs in on their own website (iamfrank.com) using their password.
+3. After successful authentication, the member is presented with a UI/form to create a reply. The form should include the original blog entry URL (from the query parameter) and the reply content.
+4. The member submits the form, and their website (iamfrank.com) sends a request to the original website's API (iamsusan.com) with the reply content and the user's identifier (e.g., username or URL).
+5. The original website (iamsusan.com) creates the reply and associates it with the member.
+
+## API endpoints to handle replies:
+1. `POST /replies`: To create a new reply, the member's website sends a request to this endpoint with the user's identifier, blog entry URL, and reply content. The server creates a reply associated with the user.
+2. `GET /replies/:articleId`: To fetch all replies for a specific blog entry, a member sends a request to this endpoint with the entry ID.
+
+This project is a spin-off from [editable.website](https://editable.website).
 A SvelteKit template for coding **completely custom website**, while allowing non-technical people to **make edits** to the content by simply logging in with a secure admin password.
-
-Check out the demo at [editable.website](https://editable.website).
 
 ## But why?
 
@@ -13,6 +28,18 @@ It's a dynamic website but light as a feather compared to building on top of a C
 - Node.js 16+ or compatible JavaScript runtime
 - Postgres 14+
 - MinIO or other S3-compatible storage solution
+
+For media storage this template is configured to use S3 compatible storage. For local development you can run a container with MinIO using this docker image:
+```bash
+docker run \
+   -p 9000:9000 \
+   -p 9090:9090 \
+   --name minio \
+   -v ~/minio/data:/data \
+   -e "MINIO_ROOT_USER=ROOTNAME" \
+   -e "MINIO_ROOT_PASSWORD=CHANGEME123" \
+   quay.io/minio/minio server /data --console-address ":9090"
+```
 
 These are needed to run the example as is, but you can choose any other database and file storage solution.
 
@@ -117,6 +144,5 @@ You can deploy your editable website anywhere else as well. For instance if you'
 
 If you have questions or need help (with development or deployment), send me an email (michael@letsken.com) and suggest a few slots where you have time for a 30 minute chat (I'm based in Austria GMT+1).
 
-## Examples
-Community provided examples of additional features you can add to your editable website:
-- [ChatGPT completion tool](https://github.com/nilskj/editable-website)
+
+

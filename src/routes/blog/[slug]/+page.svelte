@@ -4,18 +4,20 @@
   import WebsiteNav from '$lib/components/WebsiteNav.svelte';
   import Modal from '$lib/components/Modal.svelte';
   import LoginMenu from '$lib/components/LoginMenu.svelte';
-  import { goto } from '$app/navigation';
+  import { goto, invalidateAll } from '$app/navigation';
   import Footer from '$lib/components/Footer.svelte';
   import ArticleTeaser from '$lib/components/ArticleTeaser.svelte';
   import EditableWebsiteTeaser from '$lib/components/EditableWebsiteTeaser.svelte';
   import Article from '$lib/components/Article.svelte';
   import NotEditable from '$lib/components/NotEditable.svelte';
   import EditorToolbar from '$lib/components/EditorToolbar.svelte';
+  import Reply from '$lib/components/Reply.svelte';
+  import ReplyPlaceholder from '$lib/components/ReplyPlaceholder.svelte';
 
   export let data;
 
   let showUserMenu = false;
-  let editable, title, teaser, content, publishedAt, updatedAt;
+  let editable, title, teaser, content, publishedAt, updatedAt, replies;
 
   $: currentUser = data.currentUser;
 
@@ -31,6 +33,7 @@
     content = data.content;
     publishedAt = data.publishedAt;
     updatedAt = data.updatedAt;
+    replies = data.replies;
     editable = false;
   }
 
@@ -72,6 +75,20 @@
       );
     }
   }
+
+  async function postReply(event) {
+    try {
+      await fetchJSON('POST', '/api/replies', {
+        articleId: data.articleId,
+        author: 'me', //todo: get author url here,
+        content: event.detail
+      });
+      await invalidateAll();
+    } catch (err) {
+      console.error(err);
+      alert('There was an error');
+    }
+  }
 </script>
 
 <svelte:head>
@@ -97,7 +114,26 @@
   </Modal>
 {/if}
 
-<Article bind:title bind:content bind:publishedAt {editable} />
+<Article
+  bind:title
+  bind:content
+  bind:publishedAt
+  {editable}
+  on:cancel={initOrReset}
+  on:save={saveArticle}
+/>
+
+<!-- Reply placeholder -->
+<div class="max-w-screen-md mx-auto px-6 pb-12 sm:pb-24 pl-20">
+  <div id="article_replies" class="prose-sm sm:prose-xl">
+    {#each replies as reply}
+      {#if reply.content}
+        <Reply content={reply.content} published={reply.createdAt} author={reply.authorDomain} />
+      {/if}
+    {/each}
+    <ReplyPlaceholder on:cancel={initOrReset} on:save={postReply} bind:draft={editable} />
+  </div>
+</div>
 
 {#if data.articles.length > 0}
   <NotEditable {editable}>

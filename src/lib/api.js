@@ -158,6 +158,33 @@ export async function getArticleBySlug(slug) {
   });
 }
 
+export async function getArticleById(id) {
+  return await db.tx('get-article-by-slug', async t => {
+    const article = await t.one('SELECT * FROM articles WHERE article_id = $1', [id]);
+    return article;
+  });
+}
+
+export async function getRepliesByArticleSlug(slug) {
+  return await db.tx('get-replies-by-article-slug', async t => {
+    const replies = await t.any(
+      'SELECT replies.* FROM articles LEFT JOIN replies ON articles.article_id = replies.article_id WHERE slug = $1',
+      [slug]
+    );
+    return replies;
+  });
+}
+
+export async function createReply(articleId, author, content) {
+  return await db.tx('create-reply', async t => {
+    const reply = await t.one(
+      'INSERT INTO replies (article_id, author_domain, content) values($1, $2, $3) RETURNING reply_id, created_at',
+      [articleId, author, content]
+    );
+    return reply;
+  });
+}
+
 /**
  * Remove the entire article
  */

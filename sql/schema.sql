@@ -33,3 +33,17 @@ CREATE TABLE counters (
 	counter_id varchar(100) PRIMARY KEY,
 	count integer NOT NULL
 );
+
+-- replies
+DROP TABLE IF EXISTS replies cascade;
+CREATE TABLE replies (
+  reply_id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+  article_id uuid,
+  author_domain varchar(100),
+  content text,
+  created_at timestamptz DEFAULT NOW()::timestamptz,
+     CONSTRAINT fk_article
+        FOREIGN KEY(article_id)
+  	    REFERENCES articles(article_id)
+  	    ON DELETE CASCADE
+);
