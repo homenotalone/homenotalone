@@ -9,10 +9,7 @@
   import SecondaryButton from './SecondaryButton.svelte';
   import { createEventDispatcher } from 'svelte';
   import ToggleHeading from './tools/ToggleHeading.svelte';
-  import InsertImage from './tools/InsertImage.svelte';
   import CreateLink from './tools/CreateLink.svelte';
-
-  export let currentUser = undefined;
 
   let editorView = null;
   let editorState = null;

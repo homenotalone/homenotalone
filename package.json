@@ -30,7 +30,6 @@
   "type": "module",
   "dependencies": {
     "@sveltejs/adapter-node": "^1.2.3",
-    "aws-sdk": "^2.1350.0",
     "camelcase-keys": "^8.0.2",
     "pg-promise": "^11.4.3",
     "prosemirror-commands": "^1.5.0",
