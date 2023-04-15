@@ -1,7 +1,6 @@
 <script>
   export let feedEntry;
   import { classNames, formatDate } from '$lib/util';
-  import SecondaryButton from './SecondaryButton.svelte';
 
   const ENV = import.meta.env.VITE_ENV;
 
@@ -24,7 +23,7 @@
 <div>
   <div
     class={classNames(
-      'max-w-screen-md mx-auto px-6 md:text-xl py-6 sm:py-10'
+      'max-w-screen-md mx-auto px-6 md:text-lg pb-6 sm:pb-10'
     )}
   >
     <div>

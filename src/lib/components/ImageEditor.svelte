@@ -22,7 +22,7 @@
 
     // We convert all uploads to the WEBP image format
     const extension = 'webp';
-    const path = [['editable-website', 'images', uuid()].join('/'), extension].join('.');
+    const path = [['homenotalone', 'images', uuid()].join('/'), extension].join('.');
 
     const resizedBlob = await resizeImage(file, maxWidth, maxHeight, quality);
     const resizedFile = new File([resizedBlob], `${file.name.split('.')[0]}.webp`, {

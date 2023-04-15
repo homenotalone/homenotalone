@@ -12,9 +12,6 @@ const em = (px, base) => `${round(px / base)}em`;
 export default {
   content: ['./src/**/*.{html,js,svelte,ts}'],
   theme: {
-    fontFamily: {
-      sans: ['Jost', 'system-ui']
-    },
     extend: {
       typography: {
         DEFAULT: {

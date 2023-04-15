@@ -1,4 +1,4 @@
-# Home not alone
+# Home, Not Alone
 Get yourself a home on the internet and have friends over!
 
 What if we can form a neighborhood of websites that are all connected by conversations. A social network web of public websites, just like how it was. 
@@ -18,10 +18,6 @@ Let's call a person that has a `home`-site and following the API contracts a `me
 
 This project is a spin-off from [editable.website](https://editable.website).
 A SvelteKit template for coding **completely custom website**, while allowing non-technical people to **make edits** to the content by simply logging in with a secure admin password.
-
-## But why?
-
-It's a dynamic website but light as a feather compared to building on top of a CMS. It makes editing content self-explanatory.
 
 ## Step 0 - Requirements
 
@@ -55,19 +51,19 @@ cd your-website
 Create a `.env` file and set the following environment variables to point to your development database and MinIO instance:
 
 ```bash
-VITE_DB_URL=postgresql://$USER@localhost:5432/editable-website
+VITE_DB_URL=postgresql://$USER@localhost:5432/homenotalone
 VITE_S3_ACCESS_KEY=000000000000000000
 VITE_S3_SECRET_ACCESS_KEY=00000000000000000000000000000000000000
 VITE_S3_ENDPOINT=https://minio.ew-dev-assets--000000000000.addon.code.run
-VITE_S3_BUCKET=editable-website
-VITE_ASSET_PATH=https://minio.ew-dev-assets--000000000000.addon.code.run/editable-website
+VITE_S3_BUCKET=homenotalone
+VITE_ASSET_PATH=https://minio.ew-dev-assets--000000000000.addon.code.run/homenotalone
 VITE_ADMIN_PASSWORD=00000000000000000000000000000000000000
 ```
 
 Seed the database:
 
 ```bash
-psql -h localhost -U $USER -d editable-website -a -f sql/schema.sql
+psql -h localhost -U $USER -d homenotalone -a -f sql/schema.sql
 ```
 
 Once you've created a project and installed dependencies with `npm install` (or `pnpm install` or `yarn`), start a development server:
@@ -140,9 +136,13 @@ I will describe the steps to deploy to [Northflank](https://northflank.com/) (wh
 
 You can deploy your editable website anywhere else as well. For instance if you'd like to go the "Serverless" path, you can deploy on Vercel, and use NeonDB (or DigitalOcean with Connection Pooling activated). You may need to install an [adapter](https://kit.svelte.dev/docs/adapters) for your target environment.
 
-## Step 5 - Get in touch
+## Roadmap
 
-If you have questions or need help (with development or deployment), send me an email (michael@letsken.com) and suggest a few slots where you have time for a 30 minute chat (I'm based in Austria GMT+1).
+We are keeping this minimal for the start, but we are actively thinking about some next steps.
 
+- Additionally expose posts as an RSS feed
+- Support for assets (images, videos in posts)
+- Manage connections (remove, block, etc.)
+- Notification (see a little indicator that new unread items are in your feed)
 
-
+What would you like to be added next?
