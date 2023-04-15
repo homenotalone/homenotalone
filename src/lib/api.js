@@ -71,9 +71,12 @@ export async function destroySession(sessionId) {
  */
 export async function getPosts() {
   return await db.tx('get-posts', async t => {
-    return await t.any(
-      'SELECT * FROM posts ORDER BY created_at DESC'
-    );
+    return await t.any(`
+      SELECT
+        p.*,
+        (SELECT COUNT(*) FROM replies WHERE post_id = p.post_id) AS reply_count
+      FROM posts p ORDER BY created_at DESC
+    `);
   });
 }
 
