@@ -4,17 +4,17 @@
   import { formatDate } from '$lib/util';
   export let title;
   export let content;
-  export let publishedAt = undefined;
+  export let createdAt = undefined;
   export let editable;
 </script>
 
 <div>
   <div class="max-w-screen-md mx-auto px-6">
     <div class="pt-12 sm:pt-24">
-      {#if !publishedAt}
+      {#if !createdAt}
         <div class="font-bold text-sm">DRAFT</div>
       {:else}
-        <div class="font-bold text-sm">{formatDate(publishedAt)}</div>
+        <div class="font-bold text-sm">{formatDate(createdAt)}</div>
       {/if}
     </div>
     <h1 class="text-3xl md:text-5xl font-bold pt-1">
@@ -24,7 +24,7 @@
 </div>
 
 <div class="max-w-screen-md mx-auto px-6 pb-12 sm:pb-24">
-  <div id="article_content" class="prose sm:prose-xl">
+  <div id="post_content" class="prose sm:prose-xl">
     <RichText multiLine {editable} bind:content />
   </div>
 </div>

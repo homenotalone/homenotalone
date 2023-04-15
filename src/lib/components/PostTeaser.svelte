@@ -1,6 +1,6 @@
 <script>
   export let post;
-  import { classNames } from '$lib/util';
+  import { classNames, formatDate } from '$lib/util';
   import SecondaryButton from './SecondaryButton.svelte';
 
   const ORIGIN = import.meta.env.VITE_ORIGIN;
@@ -16,23 +16,28 @@
       <div>
         <a
           class={classNames('mb-12 text-2xl md:text-3xl font-bold')}
-          href={`/p/${post.slug}`}
+          href={`/posts/${post.slug}`}
         >
           {post.title}
         </a>
       </div>
       <div class="pt-2 pb-4">
         <div class="line-clamp-4">
-          <a href={`/p/${post.slug}`}>
+          <a href={`/posts/${post.slug}`}>
             {post.teaser}
           </a>
         </div>
       </div>
     </div>
-    <div class="pt-2">
-      <SecondaryButton size="sm" href={`/p/${post.slug}`}>
+    <div class="pt-2 flex space-x-2 text-sm">
+      <div>
+        {formatDate(post.createdAt)} · <a class="underline" href={`/posts/${post.slug}#replies`}>{post.replyCount} replies</a>
+      </div>
+    </div>
+    <!-- <div class="pt-2">
+      <SecondaryButton size="sm" href={`/posts/${post.slug}`}>
         Continue reading&nbsp;→
       </SecondaryButton>
-    </div>
+    </div> -->
   </div>
 </div>

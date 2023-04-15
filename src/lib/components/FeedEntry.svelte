@@ -46,12 +46,10 @@
     </div>
     <div class="pt-2 flex space-x-2 text-sm">
       <!-- Website favicon goes here -->
-      <!-- <div class="bg-gray-400 rounded-full w-5 h-5"></div> -->
+      <div class="bg-gray-400 rounded-full w-5 h-5"></div>
       <div>
         <a class="underline" href={getOriginUrl(feedEntry)}>{feedEntry.origin}</a> · {formatDate(feedEntry.createdAt)} · <a class="underline" href={getPostUrl(feedEntry)+'#replies'}>{feedEntry.replyCount} replies</a>
       </div>
-      
-      <div></div>
     </div>
   </div>
 </div>

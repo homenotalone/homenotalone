@@ -13,6 +13,7 @@
   import NotEditable from '$lib/components/NotEditable.svelte';
   import SectionLabel from '$lib/components/SectionLabel.svelte';
   import FeedEntry from '../lib/components/FeedEntry.svelte';
+  import { goto } from '$app/navigation';
 
   export let data;
   $: currentUser = data.currentUser;
@@ -92,7 +93,7 @@
   <Modal on:close={() => (showUserMenu = false)}>
     <form class="w-full block" method="POST">
       <div class="w-full flex flex-col space-y-4 p-4 sm:p-6">
-        <PrimaryButton type="button" on:click={() => goto('/blog/new')}>
+        <PrimaryButton type="button" on:click={() => goto('/posts/new')}>
           New post
         </PrimaryButton>
         <PrimaryButton on:click={toggleEdit}>Edit page</PrimaryButton>
