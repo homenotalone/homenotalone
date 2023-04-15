@@ -6,10 +6,8 @@
   import LoginMenu from '$lib/components/LoginMenu.svelte';
   import { goto, invalidateAll } from '$app/navigation';
   import Footer from '$lib/components/Footer.svelte';
-  import PostTeaser from '$lib/components/PostTeaser.svelte';
-  import EditableWebsiteTeaser from '$lib/components/EditableWebsiteTeaser.svelte';
-  import Article from '$lib/components/Article.svelte';
-  import NotEditable from '$lib/components/NotEditable.svelte';
+  import Post from '$lib/components/Post.svelte';
+  // import NotEditable from '$lib/components/NotEditable.svelte';
   import EditorToolbar from '$lib/components/EditorToolbar.svelte';
   import Reply from '$lib/components/Reply.svelte';
   import ReplyPlaceholder from '$lib/components/ReplyPlaceholder.svelte';
@@ -17,7 +15,7 @@
   export let data;
 
   let showUserMenu = false;
-  let editable, title, teaser, content, publishedAt, updatedAt, replies;
+  let editable, title, teaser, content, createdAt, updatedAt, replies;
 
   $: currentUser = data.currentUser;
 
@@ -31,7 +29,7 @@
     title = data.title;
     teaser = data.teaser;
     content = data.content;
-    publishedAt = data.publishedAt;
+    createdAt = data.createdAt;
     updatedAt = data.updatedAt;
     replies = data.replies;
     editable = false;
@@ -58,9 +56,9 @@
 
   async function saveArticle() {
     if (!currentUser) return alert('Sorry, you are not authorized.');
-    const teaser = extractTeaser(document.getElementById('article_content'));
+    const teaser = extractTeaser(document.getElementById('post_content'));
     try {
-      const result = await fetchJSON('POST', '/api/update-article', {
+      const result = await fetchJSON('POST', '/api/update-post', {
         slug: data.slug,
         title,
         content,
@@ -115,10 +113,10 @@
   </Modal>
 {/if}
 
-<Article
+<Post
   bind:title
   bind:content
-  bind:publishedAt
+  bind:createdAt
   {editable}
   on:cancel={initOrReset}
   on:save={saveArticle}
@@ -155,9 +153,5 @@
     <ReplyPlaceholder on:cancel={initOrReset} on:save={postReply} bind:draft={editable} />
   </div>
 </div>
-
-<NotEditable {editable}>
-  <EditableWebsiteTeaser />
-</NotEditable>
 
 <Footer counter={`/blog/${data.slug}`} />

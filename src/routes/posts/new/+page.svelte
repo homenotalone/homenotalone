@@ -3,9 +3,7 @@
   import WebsiteNav from '$lib/components/WebsiteNav.svelte';
   import { goto } from '$app/navigation';
   import Footer from '$lib/components/Footer.svelte';
-  import EditableWebsiteTeaser from '$lib/components/EditableWebsiteTeaser.svelte';
-  import Article from '$lib/components/Article.svelte';
-  import NotEditable from '$lib/components/NotEditable.svelte';
+  import Post from '$lib/components/Post.svelte';
   import EditorToolbar from '$lib/components/EditorToolbar.svelte';
 
   export let data;
@@ -17,18 +15,18 @@
 
   $: currentUser = data.currentUser;
 
-  async function createArticle() {
+  async function createPost() {
     if (!currentUser) {
       return alert('Sorry, you are not authorized to create new articles.');
     }
-    const teaser = extractTeaser(document.getElementById('article_content'));
+    const teaser = extractTeaser(document.getElementById('post_content'));
     try {
-      const { slug } = await fetchJSON('POST', '/api/create-article', {
+      const { slug } = await fetchJSON('POST', '/api/create-post', {
         title,
         content,
         teaser
       });
-      goto(`/blog/${slug}`);
+      goto(`/posts/${slug}`);
     } catch (err) {
       console.error(err);
       alert('A document with that title has already been published. Choose a different title.');
@@ -36,7 +34,7 @@
   }
 
   async function discardDraft() {
-    goto('/blog');
+    goto('/#posts');
   }
 </script>
 
@@ -45,14 +43,10 @@
 </svelte:head>
 
 {#if editable}
-  <EditorToolbar {currentUser} on:cancel={discardDraft} on:save={createArticle} />
+  <EditorToolbar {currentUser} on:cancel={discardDraft} on:save={createPost} />
 {/if}
 
 <WebsiteNav bind:editable bind:showUserMenu {currentUser} />
-<Article bind:title bind:content {editable} />
-
-<NotEditable {editable}>
-  <EditableWebsiteTeaser />
-</NotEditable>
+<Post bind:title bind:content {editable} />
 
 <Footer {editable} />
