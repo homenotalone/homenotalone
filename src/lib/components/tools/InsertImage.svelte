@@ -21,7 +21,7 @@
 
     // We convert all uploads to the WEBP image format
     const extension = 'webp';
-    const path = [['editable-website', 'images', uuid()].join('/'), extension].join('.');
+    const path = [['homenotalone', 'images', uuid()].join('/'), extension].join('.');
 
     const maxWidth = 1440;
     const maxHeight = 1440;

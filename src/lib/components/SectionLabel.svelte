@@ -1,4 +1,4 @@
-<div class="font-medium text-base">
+<div class="font-medium text-base pb-2">
   <slot />
   <svg width="10" height="10" viewBox="0 0 10 10" fill="none" xmlns="http://www.w3.org/2000/svg" class="inline-block">
     <g clip-path="url(#clip0_17_131)">

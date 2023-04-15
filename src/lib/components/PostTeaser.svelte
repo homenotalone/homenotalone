@@ -9,7 +9,7 @@
 <div>
   <div
     class={classNames(
-      'max-w-screen-md mx-auto px-6 md:text-xl py-6 sm:py-10'
+      'max-w-screen-md mx-auto px-6 md:text-lg pb-6 sm:pb-10'
     )}
   >
     <div>

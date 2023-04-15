@@ -18,7 +18,6 @@
   export let data;
   $: currentUser = data.currentUser;
 
-
   // --------------------------------------------------------------------------
   // DEFAULT PAGE CONTENT - AJDUST TO YOUR NEEDS
   // --------------------------------------------------------------------------
@@ -36,9 +35,9 @@
     showUserMenu;
 
   function initOrReset() {
-    title = data.page?.title || 'Untitled Website';
+    title = data.page?.title || 'Jane Doe';
     bioPicture = data.page?.bioPicture || '/images/person-placeholder.jpg';
-    bioTitle = data.page?.bioTitle || "Hi, I'm John Doe - Enter introduction here.";
+    bioTitle = data.page?.bioTitle || "Hi, I'm Jane Doe - I care about X.";
     bio = data.page?.bio || BIO_PLACEHOLDER;
     contact = data.page?.contact || "Reach me via email, instagram, or facebook";
     editable = false;
@@ -106,19 +105,11 @@
 <div>
   <div class="max-w-screen-md mx-auto px-6 pt-12 sm:pt-24">
     <NotEditable {editable}>
-      <svg width="96" height="96" viewBox="0 0 96 96" fill="none" xmlns="http://www.w3.org/2000/svg" class="pb-8 w-14 sm:w-24 mx-auto">
-        <g clip-path="url(#clip0_6_128)">
-        <rect width="96" height="96" fill="white"/>
-        <path d="M93.336 9.15999V29.88H88.296V14.2H20.648V45.56H93.336V87H1.944V66.28H6.984V81.96H74.632V50.6H1.944V9.15999H93.336ZM79.672 50.6V81.96H88.296V50.6H79.672ZM15.496 14.2H6.984V45.56H15.496V14.2Z" fill="black"/>
-        </g>
-        <defs>
-        <clipPath id="clip0_6_128">
-        <rect width="96" height="96" fill="white"/>
-        </clipPath>
-        </defs>
+      <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-14 sm:w-24 mx-auto pb-8">
+        <path stroke-linecap="round" stroke-linejoin="round" d="M2.25 12l8.954-8.955c.44-.439 1.152-.439 1.591 0L21.75 12M4.5 9.75v10.125c0 .621.504 1.125 1.125 1.125H9.75v-4.875c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125V21h4.125c.621 0 1.125-.504 1.125-1.125V9.75M8.25 21h8.25" />
       </svg>
     </NotEditable>
-    <h1 class="text-4xl md:text-7xl font-medium text-center">
+    <h1 class="text-4xl md:text-7xl font-bold text-center">
       <PlainText {editable} bind:content={title} />
     </h1>
   </div>
@@ -150,7 +141,7 @@
         <FeedEntry {feedEntry} />
       {/each}
       <!-- <div class="max-w-screen-md mx-auto px-6">
-        <a class="block px-4 py-2 border border-black text-center uppercase text-sm font-medium" href="/blog">Show all blog posts</a>
+        <a class="block px-4 py-2 border border-black text-center uppercase text-sm font-medium" href="/blog">Show all feed entries</a>
       </div> -->
     </div>
   </NotEditable>
@@ -160,7 +151,7 @@
 <!-- Bio -->
 <div id="contact" class="bg-white pb-12 sm:pb-24">
   <div class="max-w-screen-md mx-auto px-6">
-    <div class="pt-12 sm:pt-24 pb-12 text-center">
+    <!-- <div class="pt-12 sm:pt-24 pb-12 text-center">
       <Image
         class="inline-block w-48 h-48 md:w-72 md:h-72 rounded-full"
         maxWidth="384"
@@ -171,13 +162,14 @@
         bind:src={bioPicture}
         alt="Michael Aufreiter"
       />
-    </div>
+    </div> -->
+    <SectionLabel>Contact</SectionLabel>
     <div class="">
-      <h1 class="text-3xl md:text-5xl font-medium">
+      <h1 class="text-3xl md:text-5xl font-bold">
         <PlainText {editable} bind:content={bioTitle} />
       </h1>
     </div>
-    <div class="prose md:prose-xl pb-6">
+    <div class="prose md:prose-lg pb-6">
       <RichText multiLine {editable} bind:content={bio} />
     </div>
   </div>
