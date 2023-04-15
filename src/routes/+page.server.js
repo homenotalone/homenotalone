@@ -1,13 +1,15 @@
-import { getArticles, getPage } from '$lib/api';
+import { getPosts, getFeedEntries, getPage } from '$lib/api';
 
 export async function load({ locals }) {
   const currentUser = locals.user;
-  const articles = await getArticles();
+  const posts = await getPosts();
+  const feedEntries = await getFeedEntries();
   const page = await getPage('home');
 
   return {
     currentUser,
-    articles: articles.slice(0, 3),
+    posts,
+    feedEntries,
     page
   };
 }

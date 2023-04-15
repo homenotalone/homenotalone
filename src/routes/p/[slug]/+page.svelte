@@ -6,7 +6,7 @@
   import LoginMenu from '$lib/components/LoginMenu.svelte';
   import { goto, invalidateAll } from '$app/navigation';
   import Footer from '$lib/components/Footer.svelte';
-  import ArticleTeaser from '$lib/components/ArticleTeaser.svelte';
+  import PostTeaser from '$lib/components/PostTeaser.svelte';
   import EditableWebsiteTeaser from '$lib/components/EditableWebsiteTeaser.svelte';
   import Article from '$lib/components/Article.svelte';
   import NotEditable from '$lib/components/NotEditable.svelte';
@@ -155,19 +155,6 @@
     <ReplyPlaceholder on:cancel={initOrReset} on:save={postReply} bind:draft={editable} />
   </div>
 </div>
-
-{#if data.articles.length > 0}
-  <NotEditable {editable}>
-    <div class="border-t-2 border-gray-100">
-      <div class="max-w-screen-md mx-auto px-6 pt-8 sm:pt-12">
-        <div class="font-bold text-sm">READ NEXT</div>
-      </div>
-      {#each data.articles as article, i}
-        <ArticleTeaser {article} firstEntry={i === 0} />
-      {/each}
-    </div>
-  </NotEditable>
-{/if}
 
 <NotEditable {editable}>
   <EditableWebsiteTeaser />

@@ -1,6 +1,5 @@
 import slugify from 'slugify';
 import _db from './_db';
-import { SHORTCUTS } from './constants';
 
 const ADMIN_PASSWORD = import.meta.env.VITE_ADMIN_PASSWORD;
 
@@ -8,9 +7,9 @@ const ADMIN_PASSWORD = import.meta.env.VITE_ADMIN_PASSWORD;
 const db = _db.instance;
 
 /**
- * Creates a new draft
+ * Create a new post
  */
-export async function createArticle(title, content, teaser, currentUser) {
+export async function createPost(title, content, teaser, currentUser) {
   if (!currentUser) throw new Error('Not authorized');
 
   const slug = slugify(title, {
@@ -18,23 +17,22 @@ export async function createArticle(title, content, teaser, currentUser) {
     strict: true
   });
 
-  return await db.tx('create-article', async t => {
-    let newArticle = await t.one(
-      'INSERT INTO articles (slug, title, content, teaser, published_at) values($1, $2, $3, $4, NOW()) RETURNING slug, created_at',
+  return await db.tx('create-post', async t => {
+    return t.one(
+      'INSERT INTO posts (slug, title, content, teaser) values($1, $2, $3, $4) RETURNING slug, created_at',
       [slug, title, content, teaser]
     );
-    return newArticle;
   });
 }
 
 /**
  * We automatically extract a teaser text from the document's content.
  */
-export async function updateArticle(slug, title, content, teaser, currentUser) {
+export async function updatePost(slug, title, content, teaser, currentUser) {
   if (!currentUser) throw new Error('Not authorized');
-  return await db.tx('update-article', async t => {
+  return await db.tx('update-post', async t => {
     return await t.one(
-      'UPDATE articles SET title= $1, content = $2, teaser = $3, updated_at = NOW() WHERE slug = $4 RETURNING slug, updated_at',
+      'UPDATE posts SET title= $1, content = $2, teaser = $3, updated_at = NOW() WHERE slug = $4 RETURNING slug, updated_at',
       [title, content, teaser, slug]
     );
   });
@@ -69,129 +67,71 @@ export async function destroySession(sessionId) {
 }
 
 /**
- * List all available articles (newest first)
+ * List all posts
  */
-export async function getArticles(currentUser) {
-  return await db.tx('get-articles', async t => {
-    let articles;
-    if (currentUser) {
-      // When logged in show both, drafts and published articles
-      articles = await t.any(
-        'SELECT *, COALESCE(published_at, updated_at, created_at) AS modified_at FROM articles ORDER BY modified_at DESC'
-      );
-    } else {
-      articles = await t.any(
-        'SELECT * FROM articles WHERE published_at IS NOT NULL ORDER BY published_at DESC'
-      );
-    }
-    return articles;
-  });
-}
-
-/**
- * Given a slug, determine article to "read next"
- */
-export async function getNextArticle(slug) {
-  return db.tx('get-next-article', async t => {
-    return t.oneOrNone(
-      `
-      (
-        SELECT
-          title,
-          teaser,
-          slug,
-          published_at
-        FROM articles
-        WHERE
-          published_at < (SELECT published_at FROM articles WHERE slug= $1)
-        ORDER BY published_at DESC
-        LIMIT 1
-      )
-      UNION
-      (
-        SELECT title, teaser, slug, published_at FROM articles ORDER BY published_at DESC LIMIT 1
-      )
-      ORDER BY published_at ASC
-      LIMIT 1;
-    `,
-      [slug]
+export async function getPosts() {
+  return await db.tx('get-posts', async t => {
+    return await t.any(
+      'SELECT * FROM posts ORDER BY created_at DESC'
     );
   });
 }
 
 /**
- * Search within all searchable items (including articles and website sections)
+ * Get my feed
  */
-export async function search(q, currentUser) {
-  return await db.tx('search', async t => {
-    let result;
-    if (currentUser) {
-      result = await t.any(
-        "SELECT title AS name, CONCAT('/blog/', slug) AS url, COALESCE(published_at, updated_at, created_at) AS modified_at FROM articles WHERE title ILIKE $1 ORDER BY modified_at DESC",
-        [`%${q}%`]
-      );
-    } else {
-      result = await t.any(
-        "SELECT title AS name, CONCAT('/blog/', slug) AS url, COALESCE(published_at, updated_at, created_at) AS modified_at FROM articles WHERE title ILIKE $1 AND published_at IS NOT NULL ORDER BY modified_at DESC",
-        [`%${q}%`]
-      );
-    }
-
-    // Also include prefined shortcuts in search
-    SHORTCUTS.forEach(shortcut => {
-      if (shortcut.name.toLowerCase().includes(q.toLowerCase())) {
-        result.push(shortcut);
-      }
-    });
-
-    return result;
+export async function getFeedEntries() {
+  return await db.tx('get-feed-entries', async t => {
+    return await t.any(
+      'SELECT * FROM feed_entries ORDER BY created_at DESC'
+    );
   });
 }
+
 
 /**
- * Retrieve article based on a given slug
+ * Retrieve post by a given slug
  */
-export async function getArticleBySlug(slug) {
-  return await db.tx('get-article-by-slug', async t => {
-    const article = await t.one('SELECT * FROM articles WHERE slug = $1', [slug]);
-    return article;
+export async function getPostBySlug(slug) {
+  return await db.tx('get-post-by-slug', async t => {
+    return t.one('SELECT * FROM posts WHERE slug = $1', [slug]);
   });
 }
 
-export async function getArticleById(id) {
-  return await db.tx('get-article-by-slug', async t => {
-    const article = await t.one('SELECT * FROM articles WHERE article_id = $1', [id]);
-    return article;
+export async function getPostById(postId) {
+  return await db.tx('get-post-by-id', async t => {
+    const post = await t.one('SELECT * FROM posts WHERE post_id = $1', [postId]);
+    return post;
   });
 }
 
-export async function getRepliesByArticleSlug(slug) {
-  return await db.tx('get-replies-by-article-slug', async t => {
+export async function getRepliesByPostSlug(slug) {
+  return await db.tx('get-replies-by-post-slug', async t => {
     const replies = await t.any(
-      'SELECT replies.* FROM articles JOIN replies ON articles.article_id = replies.article_id WHERE slug = $1',
+      'SELECT replies.* FROM posts JOIN replies ON posts.post_id = replies.post_id WHERE slug = $1',
       [slug]
     );
     return replies;
   });
 }
 
-export async function createReply(articleId, author, content) {
+export async function createReply(postId, origin, content) {
   return await db.tx('create-reply', async t => {
     const reply = await t.one(
-      'INSERT INTO replies (article_id, author_domain, content) values($1, $2, $3) RETURNING reply_id, created_at',
-      [articleId, author, content]
+      'INSERT INTO replies (post_id, origin, content) values($1, $2, $3) RETURNING reply_id, created_at',
+      [postId, origin, content]
     );
     return reply;
   });
 }
 
 /**
- * Remove the entire article
+ * Remove the entire post
  */
-export async function deleteArticle(slug, currentUser) {
+export async function deletePost(slug, currentUser) {
   if (!currentUser) throw new Error('Not authorized');
-  return await db.tx('delete-article', async t => {
-    await t.any('DELETE FROM articles WHERE slug = $1', [slug]);
+  return await db.tx('delete-post', async t => {
+    await t.any('DELETE FROM posts WHERE slug = $1', [slug]);
     return true;
   });
 }
