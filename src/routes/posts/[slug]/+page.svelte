@@ -4,13 +4,11 @@
   import WebsiteNav from '$lib/components/WebsiteNav.svelte';
   import Modal from '$lib/components/Modal.svelte';
   import LoginMenu from '$lib/components/LoginMenu.svelte';
-  import { goto, invalidateAll } from '$app/navigation';
+  import { goto } from '$app/navigation';
   import Footer from '$lib/components/Footer.svelte';
   import Post from '$lib/components/Post.svelte';
-  // import NotEditable from '$lib/components/NotEditable.svelte';
   import EditorToolbar from '$lib/components/EditorToolbar.svelte';
   import Reply from '$lib/components/Reply.svelte';
-  import ReplyPlaceholder from '$lib/components/ReplyPlaceholder.svelte';
 
   export let data;
 
@@ -40,7 +38,7 @@
     showUserMenu = false;
   }
 
-  async function deleteArticle() {
+  async function deletePost() {
     if (!currentUser) return alert('Sorry, you are not authorized.');
     try {
       fetchJSON('POST', '/api/delete-article', {
@@ -54,7 +52,7 @@
     }
   }
 
-  async function saveArticle() {
+  async function savePost() {
     if (!currentUser) return alert('Sorry, you are not authorized.');
     const teaser = extractTeaser(document.getElementById('post_content'));
     try {
@@ -74,19 +72,15 @@
     }
   }
 
-  async function postReply(event) {
-    if (!currentUser) return alert('Sorry, you are not authorized.'); // TODO: redirect to own users website, send articleId as query param
-    try {
-      await fetchJSON('POST', '/api/replies', {
-        articleId: data.articleId,
-        author: 'ME', //todo: get author url here?
-        content: event.detail
-      });
-      await invalidateAll();
-    } catch (err) {
-      console.error(err);
-      alert('There was an error');
-    }
+  async function handleStartConversation() {
+    let origin = prompt(
+      'Please provide your Home origin to authorize the conversation',
+      'https://'
+    );
+    if (origin == null || origin === '') return;
+
+    const convoUrl = `${origin}/conversations/new?postId=${data.postId}&homeUrl=${window.location.origin}`;
+    window.open(convoUrl); // This def needs a proper UI
   }
 </script>
 
@@ -96,7 +90,7 @@
 </svelte:head>
 
 {#if editable}
-  <EditorToolbar {currentUser} on:cancel={initOrReset} on:save={saveArticle} />
+  <EditorToolbar {currentUser} on:cancel={initOrReset} on:save={savePost} />
 {/if}
 
 <WebsiteNav bind:editable bind:showUserMenu {currentUser} />
@@ -106,7 +100,7 @@
     <form class="w-full block" method="POST">
       <div class="w-full flex flex-col space-y-4 p-4 sm:p-6">
         <PrimaryButton on:click={toggleEdit}>Edit post</PrimaryButton>
-        <PrimaryButton type="button" on:click={deleteArticle}>Delete post</PrimaryButton>
+        <PrimaryButton type="button" on:click={deletePost}>Delete post</PrimaryButton>
         <LoginMenu {currentUser} />
       </div>
     </form>
@@ -119,7 +113,7 @@
   bind:createdAt
   {editable}
   on:cancel={initOrReset}
-  on:save={saveArticle}
+  on:save={savePost}
 />
 
 <!-- Reply placeholder -->
@@ -150,7 +144,8 @@
         <Reply content={reply.content} published={reply.createdAt} author={reply.authorDomain} />
       {/if}
     {/each}
-    <ReplyPlaceholder on:cancel={initOrReset} on:save={postReply} bind:draft={editable} />
+    <PrimaryButton on:click={handleStartConversation}>Start conversation!</PrimaryButton>
+    <!--<ReplyPlaceholder on:cancel={initOrReset} on:save={postReply} bind:draft={editable} />-->
   </div>
 </div>
 
