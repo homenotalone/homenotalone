@@ -35,10 +35,11 @@ DROP TABLE IF EXISTS feed_entries cascade;
 CREATE TABLE feed_entries (
   feed_entry_id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
   origin varchar(100) NOT NULL,
-  slug varchar(100) UNIQUE NOT NULL,
+  path varchar(100) UNIQUE NOT NULL, -- !! this has changed from slug -> path
   title varchar(100) NOT NULL,
   teaser varchar(1000) NOT NULL,
-  reply_count integer NOT NULL,
+  replies json NOT NULL,
+  reply_count integer NOT NULL, -- this is redundant with replies, but convenient (and faster!) for display purposes
   created_at timestamptz DEFAULT NOW()::timestamptz,
   updated_at timestamptz NULL -- content has been updated or new reply
 );
@@ -48,6 +49,14 @@ DROP TABLE IF EXISTS connections cascade;
 CREATE TABLE connections (
   connection_id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
   origin varchar(100) UNIQUE NOT NULL
+);
+
+-- subscriptions (counterpart to connections on the other host)
+-- Used to update all "connected" domains when new posts or replies are created
+DROP TABLE IF EXISTS connections cascade;
+CREATE TABLE subscriptions (
+  subscription_id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+  origin varchar(100) UNIQUE NOT NULL -- origin of the remote/subscriber
 );
 
 -- sessions
@@ -70,19 +79,3 @@ CREATE TABLE counters (
 	counter_id varchar(100) PRIMARY KEY,
 	count integer NOT NULL
 );
-
----------------------------------------------------------------------------------
--- Optional seed (useful for initial development)
----------------------------------------------------------------------------------
-
--- posts
-INSERT INTO posts (slug, title, teaser, content, created_at) VALUES
-  ('i-am-frank', 'I am Frank', 'Lorem ipsum dolor sit amet...', 'Lorem ipsum dolor sit amet, consectetur adipiscing elit. In eu neque urna. Sed consequat ornare ipsum, ac auctor magna bibendum feugiat. Cras fringilla pharetra nisi vitae consectetur.', (NOW() - INTERVAL '1 DAY'));
-
--- replies
-INSERT INTO replies (post_id, origin, content) VALUES
-  ((SELECT post_id FROM posts WHERE slug='i-am-frank'), '127.0.0.1:5174', 'Hi Frank, nice to meet you!');
-
--- feed
-INSERT INTO feed_entries (origin, slug, title, teaser, reply_count, created_at) VALUES
-('127.0.0.1:5174', 'i-am-susan', 'I am Susan', 'Lorem ipsum dolor sit amet...', 1, (NOW() - INTERVAL '2 DAY'));
