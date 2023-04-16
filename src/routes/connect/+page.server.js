@@ -1,18 +1,19 @@
 import { redirect, fail } from '@sveltejs/kit';
-import { addConnection } from '$lib/api';
+import { ensureEstablishedConnection } from '$lib/api';
 import { dev } from '$app/environment';
 
 const ORIGIN = import.meta.env.VITE_ORIGIN;
+const ADMIN_PASSWORD = import.meta.env.VITE_ADMIN_PASSWORD;
 
 /** @type {import('./$types').PageServerLoad} */
-export function load({url}) {
+export function load({ url }) {
   const origin = url.searchParams.get('origin');
   const path = url.searchParams.get('path');
 
   return {
     origin,
     path
-  }
+  };
 }
 
 // This should handle the post request
@@ -22,18 +23,14 @@ export const actions = {
     const password = data.get('password');
     const origin = data.get('origin');
     const path = data.get('path');
-    let connected = false;
-
+    if (password !== ADMIN_PASSWORD) {
+      return fail(403, { incorrect: true });
+    }
     try {
-      // TODO: implement addConnection
-      connected = await addConnection(password, origin);
+      await ensureEstablishedConnection(origin);
     } catch (err) {
-      console.error(err);
-      // TODO: Set up some error handling
-      return fail(400, { incorrect: true });
+      return fail(400, { connectionFailed: true });
     }
-    if (connected) {
-      throw redirect(303, `${dev ? 'http' : 'https'}://${origin}${path}?as=${ORIGIN}`);
-    }
+    throw redirect(303, `${dev ? 'http' : 'https'}://${origin}${path}?as=${ORIGIN}`);
   }
 };

@@ -85,12 +85,9 @@ export async function getPosts() {
  */
 export async function getFeedEntries() {
   return await db.tx('get-feed-entries', async t => {
-    return await t.any(
-      'SELECT * FROM feed_entries ORDER BY created_at DESC'
-    );
+    return await t.any('SELECT * FROM feed_entries ORDER BY created_at DESC');
   });
 }
-
 
 /**
  * Retrieve post by a given slug
@@ -216,4 +213,17 @@ export async function createOrUpdateCounter(counterId) {
  */
 function __getDateTimeMinutesAfter(minutes) {
   return new Date(new Date().getTime() + minutes * 60000).toISOString();
+}
+
+/**
+ * Create a new connection, or return an existing one if already established
+ * @param targetOrigin
+ */
+export async function ensureEstablishedConnection(targetOrigin) {
+  return await db.tx('ensure-connection', async t => {
+    return t.oneOrNone(
+      'INSERT INTO connections (origin) SELECT $1 WHERE NOT EXISTS (SELECT 1 FROM connections WHERE origin = $1) RETURNING connection_id',
+      [targetOrigin]
+    );
+  });
 }
