@@ -66,6 +66,7 @@ export async function destroySession(sessionId) {
   });
 }
 
+
 /**
  * List all posts
  */
@@ -88,6 +89,49 @@ export async function getFeedEntries() {
     return await t.any('SELECT * FROM feed_entries ORDER BY created_at DESC');
   });
 }
+
+/**
+ * After another domain added you as a connection, you create a subscription to send them
+ * "push notifications" to update their feed.
+ */
+export async function addSubscription(origin) {
+  console.info('TODO: Implement');
+}
+
+/**
+ * This should be called each time a new post/reply is created/updated.
+ * 
+ * We could run these requests in parallel and don't care if they succeed or not
+ * worst thing that could happen is that someone's feed is not updated
+ */
+export async function updateRemoteFeeds(path) {
+  // go through all subscriptions and update the feed
+  // 
+  // Feed entry is identified by origin+path and for now we push the following data to
+  // update the remote feed:
+  // 
+  // - title, teaser, replies
+  // 
+  // replies contains an array of reply meta info, used for verification
+  // For example:
+  // { id: 'acb4edde-ad86-4c9b-9e69-1fcfa0c48aaf', origin: 'foo.com' }
+  
+  // Iterate through all remotes and do something like this...
+  // await fetchJSON('POST', 'https://remotehost.com/api/update-feed', ...)
+
+  console.info('TODO: Implement');
+}
+
+/**
+ * This is what is called on the receiver end by /api/update-feed
+ */
+export async function updateRemoteFeeds(origin, path) {
+  // POST /api/update-feed should have CORS set up in such a way,
+  // that it accepts requests from all origins listed in connections, and rejects any other
+  // create or update feed_entry at given origin+path
+  console.info('TODO: Implement');
+}
+
 
 /**
  * Retrieve post by a given slug
