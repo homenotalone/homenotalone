@@ -271,3 +271,9 @@ export async function ensureEstablishedConnection(targetOrigin) {
     );
   });
 }
+
+export async function checkConnection(origin) {
+  return await db.tx('check-connection', async t => {
+    return t.oneOrNone('SELECT connection_id FROM connections WHERE origin = $1', [origin]);
+  });
+}
