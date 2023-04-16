@@ -10,13 +10,19 @@
   import EditorToolbar from '$lib/components/EditorToolbar.svelte';
   import Reply from '$lib/components/Reply.svelte';
 
+  import { dev } from '$app/environment';
+
+  const ORIGIN = import.meta.env.VITE_ORIGIN;
+
   export let data;
 
   let showUserMenu = false;
   let editable, title, teaser, content, createdAt, updatedAt, replies;
+  let showConnectPrompt;
+  let connectTo;
 
+  $: as = data.as; // guest session
   $: currentUser = data.currentUser;
-
   $: {
     // HACK: To make sure this is only run when the parent passes in new data
     data = data;
@@ -72,15 +78,13 @@
     }
   }
 
-  async function handleStartConversation() {
-    let origin = prompt(
-      'Please provide your Home origin to authorize the conversation',
-      'https://'
-    );
-    if (origin == null || origin === '') return;
-
-    const convoUrl = `${origin}/conversations/new?postId=${data.postId}&homeUrl=${window.location.origin}`;
-    window.open(convoUrl); // This def needs a proper UI
+  function sendReply() {
+    if (as) {
+      // Attempt to send the reply.
+      console.log('Do it...');
+    } else {
+      showConnectPrompt = true;
+    }
   }
 </script>
 
@@ -107,6 +111,23 @@
   </Modal>
 {/if}
 
+{#if showConnectPrompt}
+  <Modal on:close={() => (showConnectPrompt = false)}>
+    <form class="w-full block" action={`${dev ? 'http' : 'https'}://${connectTo}/connect`} method="GET">
+      <div class="w-full flex flex-col space-y-4 p-4 sm:p-6">
+        <h1 class="text-2xl sm:text-3xl font-bold pt-1">Enter your domain to authenticate *</h1>
+        <input bind:value={connectTo} placeholder="homenotalone.net" type="text" />
+        <input type="hidden" name="origin" value={ORIGIN}/>
+        <input type="hidden" name="path" value={`/posts/${data.slug}`}/>
+        <PrimaryButton type="submit">Continue</PrimaryButton>
+        <p class="text-sm pt-8">
+          * You need a website that supports the HNA (Home, Not Alone) protocol. <a class="underline" href="https://github.com/homenotalone/homenotalone" target="_blank" rel="noreferrer">Follow these steps</a> to set one up for yourself.
+        </p>
+      </div>
+    </form>
+  </Modal>
+{/if}
+
 <Post
   bind:title
   bind:content
@@ -117,8 +138,8 @@
 />
 
 <!-- Reply placeholder -->
-<div class="max-w-screen-md mx-auto px-6 pb-12 sm:pb-24 sm:pl-16">
-  <div id="article_replies" class="prose-sm sm:prose-xl">
+<div class="max-w-screen-md mx-auto px-6 pb-12 sm:pb-24">
+  <div id="replies" class="prose-sm sm:prose-xl">
     {#if replies.length}
       <div class="flex items-baseline gap-x-2 text-gray-500">
         {replies.length}
@@ -139,13 +160,18 @@
     {:else}
       <div class="">No replies yet</div>
     {/if}
+    
     {#each replies as reply}
       {#if reply.content}
         <Reply content={reply.content} published={reply.createdAt} author={reply.authorDomain} />
       {/if}
     {/each}
-    <PrimaryButton on:click={handleStartConversation}>Start conversation!</PrimaryButton>
-    <!--<ReplyPlaceholder on:cancel={initOrReset} on:save={postReply} bind:draft={editable} />-->
+
+    <div class="border border-black p-4 mt-8 mb-6">
+      <div class="text-sm"><a class="underline" href="#xyz" on:click={() => showConnectPrompt = true } >Connect your domain</a> to reply.</div>
+      <textarea class="w-full border-0 p-0 mt-6 focus:outline-none focus:border-none focus:ring-0" rows="5" placeholder="Your message"></textarea>
+    </div>
+    <PrimaryButton on:click={sendReply}>Send reply</PrimaryButton>
   </div>
 </div>
 
