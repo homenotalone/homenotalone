@@ -4,7 +4,7 @@
   import WebsiteNav from '$lib/components/WebsiteNav.svelte';
   import Modal from '$lib/components/Modal.svelte';
   import LoginMenu from '$lib/components/LoginMenu.svelte';
-  import { goto } from '$app/navigation';
+  import { goto, invalidateAll } from '$app/navigation';
   import Footer from '$lib/components/Footer.svelte';
   import Post from '$lib/components/Post.svelte';
   import EditorToolbar from '$lib/components/EditorToolbar.svelte';
@@ -47,13 +47,13 @@
   async function deletePost() {
     if (!currentUser) return alert('Sorry, you are not authorized.');
     try {
-      fetchJSON('POST', '/api/delete-article', {
+      await fetchJSON('POST', '/api/delete-post', {
         slug: data.slug
       });
       goto('/blog');
     } catch (err) {
       console.error(err);
-      alert('Error deleting the article. Try again.');
+      alert('Error deleting the post. Try again.');
       window.location.reload();
     }
   }
@@ -73,19 +73,31 @@
     } catch (err) {
       console.error(err);
       alert(
-        'There was an error. You can try again, but before that, please just copy and paste your article into a safe place.'
+        'There was an error. You can try again, but before that, please just copy and paste your post into a safe place.'
       );
     }
   }
 
-  function sendReply() {
-    if (as) {
-      // Attempt to send the reply.
-      console.log('Do it...');
+  async function sendReply() {
+    if (replyingMember) {
+      const reply = await fetchJSON('POST', `/api/replies`, {
+        replyingMember,
+        origin: ORIGIN,
+        postId: data.postId,
+        content: replyMessage
+      });
+      if (reply) {
+        replyMessage = '';
+        await invalidateAll();
+      }
     } else {
       showConnectPrompt = true;
     }
   }
+
+  $: replyingMember = currentUser ? ORIGIN : as;
+
+  let replyMessage = '';
 </script>
 
 <svelte:head>
@@ -113,15 +125,24 @@
 
 {#if showConnectPrompt}
   <Modal on:close={() => (showConnectPrompt = false)}>
-    <form class="w-full block" action={`${dev ? 'http' : 'https'}://${connectTo}/connect`} method="GET">
+    <form
+      class="w-full block"
+      action={`${dev ? 'http' : 'https'}://${connectTo}/connect`}
+      method="GET"
+    >
       <div class="w-full flex flex-col space-y-4 p-4 sm:p-6">
         <h1 class="text-2xl sm:text-3xl font-bold pt-1">Enter your domain to authenticate *</h1>
         <input bind:value={connectTo} placeholder="homenotalone.net" type="text" />
-        <input type="hidden" name="origin" value={ORIGIN}/>
-        <input type="hidden" name="path" value={`/posts/${data.slug}`}/>
+        <input type="hidden" name="origin" value={ORIGIN} />
+        <input type="hidden" name="path" value={`/posts/${data.slug}`} />
         <PrimaryButton type="submit">Continue</PrimaryButton>
         <p class="text-sm pt-8">
-          * You need a website that supports the HNA (Home, Not Alone) protocol. <a class="underline" href="https://github.com/homenotalone/homenotalone" target="_blank" rel="noreferrer">Follow these steps</a> to set one up for yourself.
+          * You need a website that supports the HNA (Home, Not Alone) protocol. <a
+            class="underline"
+            href="https://github.com/homenotalone/homenotalone"
+            target="_blank"
+            rel="noreferrer">Follow these steps</a
+          > to set one up for yourself.
         </p>
       </div>
     </form>
@@ -160,7 +181,7 @@
     {:else}
       <div class="">No replies yet</div>
     {/if}
-    
+
     {#each replies as reply}
       {#if reply.content}
         <Reply content={reply.content} published={reply.createdAt} author={reply.authorDomain} />
@@ -168,8 +189,22 @@
     {/each}
 
     <div class="border border-black p-4 mt-8 mb-6">
-      <div class="text-sm"><a class="underline" href="#xyz" on:click={() => showConnectPrompt = true } >Connect your domain</a> to reply.</div>
-      <textarea class="w-full border-0 p-0 mt-6 focus:outline-none focus:border-none focus:ring-0" rows="5" placeholder="Your message"></textarea>
+      <div class="text-sm">
+        {#if replyingMember}
+          <span class="text-gray-500">Replying as</span>
+          <span class="font-bold">{replyingMember}</span>
+        {:else}
+          <a class="underline" href="#xyz" on:click={() => (showConnectPrompt = true)}
+            >Connect your domain</a
+          > to reply.
+        {/if}
+      </div>
+      <textarea
+        class="w-full border-0 p-0 mt-6 focus:outline-none focus:border-none focus:ring-0"
+        rows="5"
+        placeholder="Your message"
+        bind:value={replyMessage}
+      />
     </div>
     <PrimaryButton on:click={sendReply}>Send reply</PrimaryButton>
   </div>

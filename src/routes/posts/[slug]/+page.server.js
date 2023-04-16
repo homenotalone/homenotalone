@@ -14,6 +14,7 @@ export async function load({ params, locals, url, cookies }) {
   return {
     ...data,
     replies,
-    currentUser
+    currentUser,
+    as: cookies.get('as') // TODO: fetch more user data, such as favicon?
   };
 }
