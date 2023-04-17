@@ -47,7 +47,7 @@ export const actions = {
         }
       }
 
-      const { replyId } = await createReply(postId, ORIGIN, sanitizedContent);
+      const { replyId } = await createReply(postId, replyingMember, sanitizedContent);
       return {
         replyId
       };
