@@ -39,7 +39,6 @@
     updatedAt = data.updatedAt;
     replies = data.replies;
     editable = false;
-    console.log(replies);
   }
 
   function toggleEdit() {
