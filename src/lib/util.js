@@ -116,7 +116,10 @@ export async function fetchJSON(method, url, data = undefined) {
       'content-type': 'application/json'
     }
   });
-  if (!response.ok) throw new Error(response.statusText);
+  if (!response.ok) {
+    console.error('ERROR trying to fetch: ', url);
+    throw new Error(response.statusText);
+  }
   const result = await response.json();
   return result;
 }

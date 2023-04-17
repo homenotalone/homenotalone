@@ -30,12 +30,13 @@ CREATE TABLE replies (
         ON DELETE CASCADE
 );
 
--- feed
+-- feed_entries
 DROP TABLE IF EXISTS feed_entries cascade;
 CREATE TABLE feed_entries (
   feed_entry_id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
   origin varchar(100) NOT NULL,
-  path varchar(100) UNIQUE NOT NULL, -- !! this has changed from slug -> path
+  post_id varchar(100) UNIQUE NOT NULL, -- !! this has changed from slug -> path
+  path varchar(100) UNIQUE NOT NULL,
   title varchar(100) NOT NULL,
   teaser varchar(1000) NOT NULL,
   replies json NOT NULL,

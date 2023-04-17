@@ -1,8 +1,10 @@
 import slugify from 'slugify';
 import _db from './_db';
 import { dev } from '$app/environment';
+import { fetchJSON } from '$lib/util';
 
 const ADMIN_PASSWORD = import.meta.env.VITE_ADMIN_PASSWORD;
+const ORIGIN = import.meta.env.VITE_ORIGIN;
 
 /** Use a singleton DB instance */
 const db = _db.instance;
@@ -19,10 +21,13 @@ export async function createPost(title, content, teaser, currentUser) {
   });
 
   return await db.tx('create-post', async t => {
-    return t.one(
+    const result = t.one(
       'INSERT INTO posts (slug, title, content, teaser) values($1, $2, $3, $4) RETURNING slug, created_at',
       [slug, title, content, teaser]
     );
+
+
+    return result;
   });
 }
 
@@ -90,47 +95,6 @@ export async function getFeedEntries() {
   });
 }
 
-/**
- * After another domain added you as a connection, you create a subscription to send them
- * "push notifications" to update their feed.
- */
-export async function addSubscription(origin) {
-  console.info('TODO: Implement');
-}
-
-/**
- * This should be called each time a new post/reply is created/updated.
- *
- * We could run these requests in parallel and don't care if they succeed or not
- * worst thing that could happen is that someone's feed is not updated
- */
-export async function updateRemoteFeeds(path) {
-  // go through all subscriptions and update the feed
-  //
-  // Feed entry is identified by origin+path and for now we push the following data to
-  // update the remote feed:
-  //
-  // - title, teaser, replies
-  //
-  // replies contains an array of reply meta info, used for verification
-  // For example:
-  // { id: 'acb4edde-ad86-4c9b-9e69-1fcfa0c48aaf', origin: 'foo.com' }
-
-  // Iterate through all remotes and do something like this...
-  // await fetchJSON('POST', 'https://remotehost.com/api/update-feed', ...)
-
-  console.info('TODO: Implement');
-}
-
-/**
- * This is what is called on the receiver end by /api/update-feed
- */
-export async function updateRemoteFeeds2(origin, path) {
-  // POST /api/update-feed should have CORS set up in such a way,
-  // that it accepts requests from all origins listed in connections, and rejects any other
-  // create or update feed_entry at given origin+path
-  console.info('TODO: Implement');
-}
 
 /**
  * Retrieve post by a given slug
@@ -164,6 +128,8 @@ export async function createReply(postId, origin, content) {
       'INSERT INTO replies (post_id, origin, content) values($1, $2, $3) RETURNING reply_id, created_at',
       [postId, origin, content]
     );
+    // We intentionally don't await this
+    await updateRemoteFeedsForPost(t, postId);
     return reply;
   });
 }
@@ -290,20 +256,97 @@ export async function checkConnection(origin) {
   });
 }
 
+/**
+ * Used by /api/update-feed
+ * 
+ * NOTE: We currently treat postId as the unique id. Potentially this may
+ * allow a post moving to a different domain (origin) in the future.
+ */
+export async function createOrUpdateFeedEntry({postId, origin, path, title, teaser, replies }) {
+  return await db.tx('create-or-update-feed-entry', async t => {
+    const hasConnection = Boolean(await t.oneOrNone('SELECT connection_id FROM connections WHERE origin = $1', [origin]));
+    console.log('hasConnection', hasConnection);
+    console.log('replies', replies);
+    if (!hasConnection) throw new Error(`No conenction registered for ${origin}`);
+    const entryExists = await t.oneOrNone('SELECT post_id FROM feed_entries WHERE post_id = $1', [postId]);
+    const replyCount = replies.length; // for convenience
+
+    if (entryExists) {
+      return await t.one('UPDATE feed_entries SET origin = $1, path = $2, title = $3, teaser = $4, replies = $5, reply_count = $6, updated_at = NOW()  WHERE post_id = $7 RETURNING feed_entry_id', [
+        origin,
+        path,
+        title,
+        teaser,
+        JSON.stringify(replies),
+        replyCount,
+        postId
+      ]);
+    } else {
+      return await t.one('INSERT INTO feed_entries (post_id, origin, path, title, teaser, replies, reply_count) values($1, $2, $3, $4, $5, $6, $7) RETURNING feed_entry_id', [
+        postId,
+        origin,
+        path,
+        title,
+        teaser,
+        JSON.stringify(replies),
+        replyCount
+      ]);
+    }
+  });
+}
+
 
 // HNA-1 Protocol related stuff below this line:
 
 /**
- * Create a new subscription, or return an existing one if already established
+ * Create a new subscription, or return an existing one if already established. This
+ * is done after a new connection has been established by a remote.
+ * 
  * @param targetOrigin
  */
 export async function hasConnection(remoteOrigin, origin) {
   try {
-    const hasConnection = await fetch(
+    const result = await fetch(
       `${dev ? 'http' : 'https'}://${remoteOrigin}/api/check-connection?${new URLSearchParams({origin})}`
     );
-    return Boolean(await hasConnection.json());
+    return Boolean(await result.json());
   } catch(err) {
     console.log(err);
   }
+}
+
+/**
+ * This should be called each time a new post/reply is created/updated.
+ *
+ * We could run these requests in parallel and don't care if they succeed or not
+ * worst thing that could happen is that someone's feed is not updated
+ */
+export async function updateRemoteFeedsForPost(t, postId) {
+
+  const subscriptions = await t.any('SELECT origin FROM subscriptions');
+  // We include post_id so we can potentially update the feed-entry accordingly when a post's slug has changed
+  const post = await t.one('SELECT post_id, title, teaser FROM posts WHERE post_id = $1', [postId]);
+  const replies = await t.any('SELECT reply_id, origin FROM replies WHERE post_id = $1', [postId]);
+  
+  // NOTE we don't do synchronization here on purpose. We don't care too much if some origin's
+  // aren't reachable. They'll just miss an update.
+
+  for (let i = 0; i < subscriptions.length; i++) {
+    const subscription = subscriptions[i];
+    // console.log('fetching');
+    try {
+      const result = await fetchJSON('POST', `${dev ? 'http' : 'https'}://${subscription.origin}/api/update-feed`, {
+        origin: ORIGIN,
+        ...post,
+        path: `/posts/${postId}`, // when you change the slug locally, this updates it at your subscriber's feed
+        replies
+      });
+      console.log('update-feed result', result);
+    } catch(err) {
+      console.log('MEHEEHE');
+      console.error(err);
+    }
+  }
+
+  return true; // Sync started...
 }
