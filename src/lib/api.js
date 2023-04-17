@@ -20,15 +20,15 @@ export async function createPost(title, content, teaser, currentUser) {
     strict: true
   });
 
-  return await db.tx('create-post', async t => {
-    const result = t.one(
-      'INSERT INTO posts (slug, title, content, teaser) values($1, $2, $3, $4) RETURNING slug, created_at',
+  const result = await db.tx('create-post', async t => {
+    return await t.one(
+      'INSERT INTO posts (slug, title, content, teaser) values($1, $2, $3, $4) RETURNING post_id, slug, created_at',
       [slug, title, content, teaser]
     );
-
-
-    return result;
   });
+  // Once post is created update the remote feeds, but do not wait for it ...
+  updateRemoteFeedsForPost(result.postId);
+  return result;
 }
 
 /**
@@ -123,15 +123,14 @@ export async function getRepliesByPostSlug(slug) {
 }
 
 export async function createReply(postId, origin, content) {
-  return await db.tx('create-reply', async t => {
-    const reply = await t.one(
+  const reply = await db.tx('create-reply', async t => {
+    return await t.one(
       'INSERT INTO replies (post_id, origin, content) values($1, $2, $3) RETURNING reply_id, created_at',
       [postId, origin, content]
     );
-    // We intentionally don't await this
-    await updateRemoteFeedsForPost(t, postId);
-    return reply;
   });
+  updateRemoteFeedsForPost(postId);
+  return reply;
 }
 
 /**
@@ -282,7 +281,7 @@ export async function createOrUpdateFeedEntry({postId, origin, path, title, teas
         postId
       ]);
     } else {
-      return await t.one('INSERT INTO feed_entries (post_id, origin, path, title, teaser, replies, reply_count) values($1, $2, $3, $4, $5, $6, $7) RETURNING feed_entry_id', [
+      return await t.one('INSERT INTO feed_entries (post_id, origin, path, title, teaser, replies, reply_count, updated_at) values($1, $2, $3, $4, $5, $6, $7, NOW()) RETURNING feed_entry_id', [
         postId,
         origin,
         path,
@@ -321,32 +320,33 @@ export async function hasConnection(remoteOrigin, origin) {
  * We could run these requests in parallel and don't care if they succeed or not
  * worst thing that could happen is that someone's feed is not updated
  */
-export async function updateRemoteFeedsForPost(t, postId) {
-
-  const subscriptions = await t.any('SELECT origin FROM subscriptions');
-  // We include post_id so we can potentially update the feed-entry accordingly when a post's slug has changed
-  const post = await t.one('SELECT post_id, title, teaser FROM posts WHERE post_id = $1', [postId]);
-  const replies = await t.any('SELECT reply_id, origin FROM replies WHERE post_id = $1', [postId]);
+export async function updateRemoteFeedsForPost(postId) {
+  return await db.tx('create-post', async t => {
+    const subscriptions = await t.any('SELECT origin FROM subscriptions');
+    // We include post_id so we can potentially update the feed-entry accordingly when a post's slug has changed
+    const post = await t.one('SELECT post_id, title, teaser, slug FROM posts WHERE post_id = $1', [postId]);
+    const replies = await t.any('SELECT reply_id, origin FROM replies WHERE post_id = $1', [postId]);
+    
+    // NOTE we don't do synchronization here on purpose. We don't care too much if some origin's
+    // aren't reachable. They'll just miss an update.
   
-  // NOTE we don't do synchronization here on purpose. We don't care too much if some origin's
-  // aren't reachable. They'll just miss an update.
-
-  for (let i = 0; i < subscriptions.length; i++) {
-    const subscription = subscriptions[i];
-    // console.log('fetching');
-    try {
-      const result = await fetchJSON('POST', `${dev ? 'http' : 'https'}://${subscription.origin}/api/update-feed`, {
-        origin: ORIGIN,
-        ...post,
-        path: `/posts/${postId}`, // when you change the slug locally, this updates it at your subscriber's feed
-        replies
-      });
-      console.log('update-feed result', result);
-    } catch(err) {
-      console.log('MEHEEHE');
-      console.error(err);
+    for (let i = 0; i < subscriptions.length; i++) {
+      const subscription = subscriptions[i];
+      try {
+        await fetchJSON('POST', `${dev ? 'http' : 'https'}://${subscription.origin}/api/update-feed`, {
+          origin: ORIGIN,
+          postId: post.postId,
+          title: post.title,
+          teaser: post.teaser,
+          path: `/posts/${post.slug}`, // when you change the slug locally, this updates it at your subscriber's feed
+          replies
+        });
+      } catch(err) {
+        console.error(err);
+      }
     }
-  }
+  
+    return true; // Sync started...
+  });
 
-  return true; // Sync started...
 }
