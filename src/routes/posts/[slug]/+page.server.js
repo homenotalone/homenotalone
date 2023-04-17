@@ -1,6 +1,6 @@
-import { createReply, getPostBySlug, getRepliesByPostSlug } from '$lib/api';
+import { createReply, getPostBySlug, getRepliesByPostSlug, ensureSubscription, hasConnection } from '$lib/api';
 import { fail } from '@sveltejs/kit';
-import { dev } from '$app/environment';
+
 import sanitizeHtml from 'sanitize-html';
 
 const ORIGIN = import.meta.env.VITE_ORIGIN;
@@ -16,6 +16,13 @@ export async function load({ params, locals, url, cookies }) {
   const currentUser = locals.user;
   const data = await getPostBySlug(params.slug);
   const replies = await getRepliesByPostSlug(params.slug);
+
+  // HACK: As soon as `as` parameter is present we register a subscription
+  // TODO: create the subscription as part of an atomic two-way handshake "add connection" transaction.
+  if (await hasConnection(as, ORIGIN)) {
+    await ensureSubscription(as);
+  }
+
   return {
     ...data,
     replies,
@@ -37,14 +44,8 @@ export const actions = {
 
     try {
       // Bypass check if user is admin
-      if (!currentUser) {
-        const hasConnection = await fetch(
-          `${dev ? 'http' : 'https'}://${replyingMember}/api/check-connection?origin=${ORIGIN}`
-        );
-        const result = await hasConnection.json();
-        if (!result) {
-          return fail(403, { notConnected: true });
-        }
+      if (!currentUser && !await hasConnection(replyingMember, ORIGIN)) {
+        return fail(403, { notConnected: true });
       }
 
       const { replyId } = await createReply(postId, replyingMember, sanitizedContent);

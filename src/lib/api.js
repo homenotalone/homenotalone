@@ -1,5 +1,6 @@
 import slugify from 'slugify';
 import _db from './_db';
+import { dev } from '$app/environment';
 
 const ADMIN_PASSWORD = import.meta.env.VITE_ADMIN_PASSWORD;
 
@@ -270,8 +271,39 @@ export async function ensureEstablishedConnection(targetOrigin) {
   });
 }
 
+/**
+ * Create a new subscription, or return an existing one if already established
+ * @param targetOrigin
+ */
+export async function ensureSubscription(targetOrigin) {
+  return await db.tx('ensure-subscription', async t => {
+    return t.oneOrNone(
+      'INSERT INTO subscriptions (origin) SELECT $1 WHERE NOT EXISTS (SELECT 1 FROM subscriptions WHERE origin = $1) RETURNING subscription_id',
+      [targetOrigin]
+    );
+  });
+}
+
 export async function checkConnection(origin) {
   return await db.tx('check-connection', async t => {
     return t.oneOrNone('SELECT connection_id FROM connections WHERE origin = $1', [origin]);
   });
+}
+
+
+// HNA-1 Protocol related stuff below this line:
+
+/**
+ * Create a new subscription, or return an existing one if already established
+ * @param targetOrigin
+ */
+export async function hasConnection(remoteOrigin, origin) {
+  try {
+    const hasConnection = await fetch(
+      `${dev ? 'http' : 'https'}://${remoteOrigin}/api/check-connection?${new URLSearchParams({origin})}`
+    );
+    return Boolean(await hasConnection.json());
+  } catch(err) {
+    console.log(err);
+  }
 }
