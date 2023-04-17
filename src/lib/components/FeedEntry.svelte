@@ -17,7 +17,6 @@
       feedEntry.origin
     ].join('')
   }
-  console.log('feedEntry', feedEntry);
 </script>
 
 <div>
@@ -44,7 +43,7 @@
       </div>
     </div>
     <div class="pt-2 flex space-x-2 text-sm">
-      <!-- Website favicon goes here -->
+      <!-- Assuming favicon-48x48.png is present. -->
       <img class="w-5 h-5" src={getOriginUrl(feedEntry)+'/favicon-48x48.png'} alt={feedEntry.origin} />
       <div>
         <a class="underline" href={getOriginUrl(feedEntry)}>{feedEntry.origin}</a> · {formatDate(feedEntry.updatedAt, true)} · <a class="underline" href={getPostUrl(feedEntry)+'#replies'}>{feedEntry.replyCount} replies</a>

@@ -82,6 +82,7 @@ export async function getPosts() {
         p.*,
         (SELECT COUNT(*) FROM replies WHERE post_id = p.post_id) AS reply_count
       FROM posts p ORDER BY created_at DESC
+      LIMIT 30
     `);
   });
 }
@@ -91,7 +92,7 @@ export async function getPosts() {
  */
 export async function getFeedEntries() {
   return await db.tx('get-feed-entries', async t => {
-    return await t.any('SELECT * FROM feed_entries ORDER BY created_at DESC');
+    return await t.any('SELECT * FROM feed_entries ORDER BY created_at DESC LIMIT 30');
   });
 }
 
