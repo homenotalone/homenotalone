@@ -5,7 +5,11 @@ Get yourself a home on the internet and have friends over!
 What if we can form a neighborhood of websites that are all connected by conversations. A social network web of public websites, just like how it was. 
 Instead of a simple "follow" button, the contact is established when you first reply to a post on another website, and both the original post and its replies are then reflected on both websites.
 
-Check out [nisse.tech](https://nisse.tech) and [michaelaufreiter.com](https://michaelaufreiter.com) to see it in action.
+First watch [the introduction video](https://share.descript.com/view/4VaCkBkds0Z).
+
+Second, check out [nisse.tech](https://nisse.tech) and [michaelaufreiter.com](https://michaelaufreiter.com) to see for yourself.
+
+Third, create your own home, and leave us a comment. :) Deployment instructions below.
 
 ## How does it work?
 
@@ -73,7 +77,7 @@ This project is a spin-off from [editable.website](https://editable.website) tha
 
 ## Step 4 - Deployment
 
-I will describe the steps to deploy to [Northflank](https://northflank.com/) (which I am using). I recommend to assign 0.2 vCPU and 512MB RAM to each resource (~ $17/month) but you can go lower to save some costs or higher if you expect your site to have significant traffic.
+I will describe the steps to deploy to [Northflank](https://northflank.com/) (which I am using). I recommend to assign 0.2 vCPU and 512MB RAM to each resource (~ $17/month) but you can easily go lower to save some costs or higher if you expect your site to have significant traffic.
 
 1. Create an instance Postgres 14 through the Northflank user interface.
 
