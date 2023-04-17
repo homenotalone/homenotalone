@@ -1,20 +1,19 @@
 <script>
   export let feedEntry;
   import { classNames, formatDate } from '$lib/util';
-
-  const ENV = import.meta.env.VITE_ENV;
+  import { dev } from '$app/environment';
 
   function getPostUrl(feedEntry) {
     return [
-      ENV === 'development' ? 'http:/' : 'https:/',
+      dev ? 'http:/' : 'https:/',
       feedEntry.origin,
-      feedEntry.slug
+      feedEntry.path
     ].join('/')
   }
 
   function getOriginUrl(feedEntry) {
     return [
-      ENV === 'development' ? 'http:/' : 'https:/',
+      dev ? 'http:/' : 'https:/',
       feedEntry.origin
     ].join('/')
   }
@@ -45,7 +44,7 @@
     </div>
     <div class="pt-2 flex space-x-2 text-sm">
       <!-- Website favicon goes here -->
-      <div class="bg-gray-400 rounded-full w-5 h-5"></div>
+      <img class="w-5 h-5" src={getOriginUrl(feedEntry)+'/favicon-48x48.png'} alt={feedEntry.origin} />
       <div>
         <a class="underline" href={getOriginUrl(feedEntry)}>{feedEntry.origin}</a> · {formatDate(feedEntry.createdAt)} · <a class="underline" href={getPostUrl(feedEntry)+'#replies'}>{feedEntry.replyCount} replies</a>
       </div>

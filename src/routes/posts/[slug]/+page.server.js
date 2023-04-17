@@ -19,7 +19,7 @@ export async function load({ params, locals, url, cookies }) {
 
   // HACK: As soon as `as` parameter is present we register a subscription
   // TODO: create the subscription as part of an atomic two-way handshake "add connection" transaction.
-  if (await hasConnection(as, ORIGIN)) {
+  if (as && await hasConnection(as, ORIGIN)) {
     await ensureSubscription(as);
   }
 
