@@ -9,12 +9,14 @@
   import Post from '$lib/components/Post.svelte';
   import EditorToolbar from '$lib/components/EditorToolbar.svelte';
   import Reply from '$lib/components/Reply.svelte';
+  import { enhance } from '$app/forms';
 
   import { dev } from '$app/environment';
 
   const ORIGIN = import.meta.env.VITE_ORIGIN;
 
   export let data;
+  export let form;
 
   let showUserMenu = false;
   let editable, title, teaser, content, createdAt, updatedAt, replies;
@@ -75,23 +77,6 @@
       alert(
         'There was an error. You can try again, but before that, please just copy and paste your post into a safe place.'
       );
-    }
-  }
-
-  async function sendReply() {
-    if (replyingMember) {
-      const reply = await fetchJSON('POST', `/api/replies`, {
-        replyingMember,
-        origin: ORIGIN,
-        postId: data.postId,
-        content: replyMessage
-      });
-      if (reply) {
-        replyMessage = '';
-        await invalidateAll();
-      }
-    } else {
-      showConnectPrompt = true;
     }
   }
 
@@ -188,25 +173,40 @@
       {/if}
     {/each}
 
-    <div class="border border-black p-4 mt-8 mb-6">
-      <div class="text-sm">
-        {#if replyingMember}
-          <span class="text-gray-500">Replying as</span>
-          <span class="font-bold">{replyingMember}</span>
-        {:else}
-          <a class="underline" href="#xyz" on:click={() => (showConnectPrompt = true)}
-            >Connect your domain</a
-          > to reply.
-        {/if}
+    <form class="w-full block" method="POST" action="?/reply" use:enhance>
+      <div class="border border-black p-4 mt-8 mb-6">
+        <div class="text-sm">
+          {#if replyingMember}
+            <span class="text-gray-500">Replying as</span>
+            <span class="font-bold">{replyingMember}</span>
+          {:else}
+            <a class="underline" href="#xyz" on:click={() => (showConnectPrompt = true)}
+              >Connect your domain</a
+            > to reply.
+          {/if}
+        </div>
+        <textarea
+          class="w-full border-0 p-0 mt-6 focus:outline-none focus:border-none focus:ring-0"
+          rows="5"
+          placeholder="Your message"
+          bind:value={replyMessage}
+          name="replyContent"
+        />
+        <input type="hidden" name="replyingMember" value={replyingMember} />
+        <input type="hidden" name="postId" value={data.postId} />
       </div>
-      <textarea
-        class="w-full border-0 p-0 mt-6 focus:outline-none focus:border-none focus:ring-0"
-        rows="5"
-        placeholder="Your message"
-        bind:value={replyMessage}
-      />
-    </div>
-    <PrimaryButton on:click={sendReply}>Send reply</PrimaryButton>
+      <PrimaryButton type="submit">Send reply</PrimaryButton>
+      {#if form?.notConnected}
+        <p class="p-4 bg-red-100 text-red-600 my-4 rounded-md">
+          Could not get connection details from reply origin. Please try again.
+        </p>
+      {/if}
+      {#if form?.unableToReply}
+        <p class="p-4 bg-red-100 text-red-600 my-4 rounded-md">
+          Oops, can't post reply right now. Please try again.
+        </p>
+      {/if}
+    </form>
   </div>
 </div>
 
