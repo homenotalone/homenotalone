@@ -53,7 +53,7 @@ CREATE TABLE connections (
 
 -- subscriptions (counterpart to connections on the other host)
 -- Used to update all "connected" domains when new posts or replies are created
-DROP TABLE IF EXISTS connections cascade;
+DROP TABLE IF EXISTS subscriptions cascade;
 CREATE TABLE subscriptions (
   subscription_id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
   origin varchar(100) UNIQUE NOT NULL -- origin of the remote/subscriber
