@@ -191,6 +191,10 @@
           placeholder="Your message"
           bind:value={replyMessage}
           name="replyContent"
+          required
+          on:keydown={e => {
+            if (!replyingMember) e.preventDefault();
+          }}
           on:click={() => {
             if (!replyingMember) {
               showConnectPrompt = true;
