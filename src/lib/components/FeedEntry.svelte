@@ -5,18 +5,19 @@
 
   function getPostUrl(feedEntry) {
     return [
-      dev ? 'http:/' : 'https:/',
+      dev ? 'http://' : 'https://',
       feedEntry.origin,
       feedEntry.path
-    ].join('/')
+    ].join('')
   }
 
   function getOriginUrl(feedEntry) {
     return [
-      dev ? 'http:/' : 'https:/',
+      dev ? 'http://' : 'https://',
       feedEntry.origin
-    ].join('/')
+    ].join('')
   }
+  console.log('feedEntry', feedEntry);
 </script>
 
 <div>
@@ -46,7 +47,7 @@
       <!-- Website favicon goes here -->
       <img class="w-5 h-5" src={getOriginUrl(feedEntry)+'/favicon-48x48.png'} alt={feedEntry.origin} />
       <div>
-        <a class="underline" href={getOriginUrl(feedEntry)}>{feedEntry.origin}</a> · {formatDate(feedEntry.createdAt)} · <a class="underline" href={getPostUrl(feedEntry)+'#replies'}>{feedEntry.replyCount} replies</a>
+        <a class="underline" href={getOriginUrl(feedEntry)}>{feedEntry.origin}</a> · {formatDate(feedEntry.updatedAt, true)} · <a class="underline" href={getPostUrl(feedEntry)+'#replies'}>{feedEntry.replyCount} replies</a>
       </div>
     </div>
   </div>
