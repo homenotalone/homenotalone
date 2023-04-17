@@ -14,13 +14,6 @@ Let's call a person that has a `home`-site and following the API contracts a `me
 4. The member submits the form, and their website (iamfrank.com) sends a request to the original website's API (iamsusan.com) with the reply content and the user's identifier (e.g., username or URL).
 5. The original website (iamsusan.com) creates the reply and associates it with the member.
 
-## API endpoints to handle replies:
-1. `POST /replies`: To create a new reply, the member's website sends a request to this endpoint with the user's identifier, blog entry URL, and reply content. The server creates a reply associated with the user.
-2. `GET /replies/:articleId`: To fetch all replies for a specific blog entry, a member sends a request to this endpoint with the entry ID.
-
-This project is a spin-off from [editable.website](https://editable.website).
-A SvelteKit template for coding **completely custom website**, while allowing non-technical people to **make edits** to the content by simply logging in with a secure admin password.
-
 ## Step 0 - Requirements
 
 - Node.js 16+ or compatible JavaScript runtime
@@ -71,7 +64,8 @@ You can literally do everything that SvelteKit allows you to do. We recommend th
 
 ## Step 3 - Making changes to the content
 
-Just navigate to `http://127.0.0.1:5173/login` and enter your secure admin password (`VITE_ADMIN_PASSWORD`). Now you see an additional ellipsis menu, which will provide you an "Edit page" or "Edit post" option for all pages that you have set up as "editable".
+This project is a spin-off from [editable.website](https://editable.website) that enables in-place editing of website content. Navigate to `http://127.0.0.1:5173/login` and enter your secure admin password (`VITE_ADMIN_PASSWORD`). Now you see an additional ellipsis menu, which will provide you an "Edit page" or "Edit post" option for all pages that you have set up as "editable".
+
 
 ## Step 4 - Deployment
 
