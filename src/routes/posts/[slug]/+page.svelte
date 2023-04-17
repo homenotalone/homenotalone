@@ -191,6 +191,11 @@
           placeholder="Your message"
           bind:value={replyMessage}
           name="replyContent"
+          on:click={() => {
+            if (!replyingMember) {
+              showConnectPrompt = true;
+            }
+          }}
         />
         <input type="hidden" name="replyingMember" value={replyingMember} />
         <input type="hidden" name="postId" value={data.postId} />
@@ -203,7 +208,7 @@
       {/if}
       {#if form?.unableToReply}
         <p class="p-4 bg-red-100 text-red-600 my-4 rounded-md">
-          Oops, can't post reply right now. Please try again.
+          Oops! Can't post reply right now. Please try again.
         </p>
       {/if}
     </form>
