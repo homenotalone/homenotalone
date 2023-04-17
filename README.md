@@ -1,18 +1,22 @@
 # Home, Not Alone
+
 Get yourself a home on the internet and have friends over!
 
 What if we can form a neighborhood of websites that are all connected by conversations. A social network web of public websites, just like how it was. 
 Instead of a simple "follow" button, the contact is established when you first reply to a post on another website, and both the original post and its replies are then reflected on both websites.
 
-Check out [nisse.tech](https://nisse.tech), and [michaelaufreiter.com](https://michaelaufreiter.com) to see it in action.
+Check out [nisse.tech](https://nisse.tech) and [michaelaufreiter.com](https://michaelaufreiter.com) to see it in action.
 
 ## How does it work?
+
 Let's call a person that has a `home`-site and following the API contracts a `member`. 
-1. When a member (e.g., iamfrank) wants to reply to a blog entry on another website (e.g., iamsusan.com), they are redirected back to their own website (e.g., iamfrank.com) with the blog entry URL as a query parameter.
+1. When a member (e.g., iamfrank.com) wants to reply to a blog entry on another website (e.g., iamsusan.com), they are redirected back to their own website (e.g., iamfrank.com) with the blog entry URL as a query parameter.
 2. The member logs in on their own website (iamfrank.com) using their password.
-3. After successful authentication, the member is presented with a UI/form to create a reply. The form should include the original blog entry URL (from the query parameter) and the reply content.
-4. The member submits the form, and their website (iamfrank.com) sends a request to the original website's API (iamsusan.com) with the reply content and the user's identifier (e.g., username or URL).
-5. The original website (iamsusan.com) creates the reply and associates it with the member.
+3. After successfull authentication a connection entry is created in the database and the user is redirected back to the blog post.
+4. Now they can type their response and post it
+5. The reply is created on the original site (iamsusan.com) and a "feed update" is sent to the author's site (iamfrank.com)
+6. Now iamsusan.com shows a new reply and iamfrank.com shows an updated feed with the correct reply count and other metadata.
+
 
 ## Step 0 - Requirements
 
