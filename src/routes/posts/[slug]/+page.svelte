@@ -179,6 +179,7 @@
           {#if replyingMember}
             <span class="text-gray-500">Replying as</span>
             <span class="font-bold">{replyingMember}</span>
+            &nbsp;(<a class="underline" href="#xyz" on:click={() => (showConnectPrompt = true)}>Not you?</a>)
           {:else}
             <a class="underline" href="#xyz" on:click={() => (showConnectPrompt = true)}
               >Connect your domain</a

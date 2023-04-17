@@ -22,7 +22,7 @@
     <input
       class="block w-full mb-6"
       bind:value={password}
-      placeholder="homenotalone.net"
+      placeholder={`Enter admin password for ${ORIGIN}`}
       type="password"
       name="password"
     />

@@ -31,6 +31,6 @@ export const actions = {
     } catch (err) {
       return fail(400, { connectionFailed: true });
     }
-    throw redirect(303, `${dev ? 'http' : 'https'}://${origin}${path}?as=${ORIGIN}`);
+    throw redirect(303, `${dev ? 'http' : 'https'}://${origin}${path}?as=${ORIGIN}#replies`);
   }
 };
