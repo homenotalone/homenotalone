@@ -94,4 +94,4 @@ We are keeping this minimal for the start, but we are actively thinking about so
 - Manage connections (remove, block, etc.)
 - Notification (see a little indicator that new unread items are in your feed)
 
-What would you like to be added next?
+What would you like to see added next?
