@@ -39,6 +39,7 @@
     updatedAt = data.updatedAt;
     replies = data.replies;
     editable = false;
+    console.log(replies);
   }
 
   function toggleEdit() {
@@ -169,7 +170,7 @@
 
     {#each replies as reply}
       {#if reply.content}
-        <Reply content={reply.content} published={reply.createdAt} author={reply.authorDomain} />
+        <Reply content={reply.content} published={reply.createdAt} author={reply.origin} />
       {/if}
     {/each}
 
