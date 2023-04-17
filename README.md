@@ -5,7 +5,7 @@ Get yourself a home on the internet and have friends over!
 What if we can form a neighborhood of websites that are all connected by conversations. A social network web of public websites, just like how it was. 
 Instead of a simple "follow" button, the contact is established when you first reply to a post on another website, and both the original post and its replies are then reflected on both websites.
 
-First watch [the introduction video](https://share.descript.com/view/4VaCkBkds0Z).
+First, watch [the introduction video](https://share.descript.com/view/4VaCkBkds0Z).
 
 Second, check out [nisse.tech](https://nisse.tech) and [michaelaufreiter.com](https://michaelaufreiter.com) to see for yourself.
 
