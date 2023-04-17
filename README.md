@@ -33,8 +33,8 @@ cd your-website
 Create a `.env` file and set the following environment variables to point to your development database and MinIO instance:
 
 ```bash
-VITE_DB_URL=postgresql://$USER@localhost:5432/homenotalone
-VITE_ORIGIN=your-domain.com
+VITE_DB_URL=postgresql://$USER@localhost:5432/your-website
+VITE_ORIGIN=your-website.com
 VITE_ADMIN_PASSWORD=00000000000000000000000000000000000000
 ```
 
